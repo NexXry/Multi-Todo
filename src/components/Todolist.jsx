@@ -1,9 +1,13 @@
 import {TodoItem} from "./TodoItem.jsx";
-import {useState} from "react";
+import {useEffect, useState} from "react";
+import { socket } from '../socket';
 
 export const Todolist = () => {
     const [todos, setTodos] = useState([]);
     const [task, setTask] = useState();
+    const [isConnected, setIsConnected] = useState(socket.connected);
+    const [fooEvents, setFooEvents] = useState([]);
+
     const addTodo = ()=>{
         setTodos([...todos,{
             id: Math.floor(Math.random() * 10000),
@@ -12,6 +16,30 @@ export const Todolist = () => {
             done: false
         }])
     }
+
+    useEffect(() => {
+        function onConnect() {
+            setIsConnected(true);
+        }
+
+        function onDisconnect() {
+            setIsConnected(false);
+        }
+
+        function onFooEvent(value) {
+            setFooEvents(previous => [...previous, value]);
+        }
+
+        socket.on('connection', onConnect);
+        socket.on('disconnect', onDisconnect);
+        socket.on('foo', onFooEvent);
+
+        return () => {
+            socket.off('connect', onConnect);
+            socket.off('disconnect', onDisconnect);
+            socket.off('foo', onFooEvent);
+        };
+    }, []);
 
     const handleTask = (id)=>{
         let updateTodos = todos.map((todo)=> todo.id === id ? {...todo,done: !todo.done} : todo)
