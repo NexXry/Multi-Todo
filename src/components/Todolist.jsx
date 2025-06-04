@@ -30,7 +30,7 @@ export const Todolist = () => {
             setFooEvents(previous => [...previous, value]);
         }
 
-        socket.on('connection', onConnect);
+        socket.on('connect', onConnect);
         socket.on('disconnect', onDisconnect);
         socket.on('foo', onFooEvent);
 
